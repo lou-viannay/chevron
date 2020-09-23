@@ -217,6 +217,12 @@ def render(template='', data={}, partials_path='.', partials_ext='mustache',
 
         # If we're a variable tag
         elif tag == 'variable':
+            key_format = key.split(':')
+            key = key_format[0]
+            if len(key_format) == 2:
+                formatter = u"{{:{}}}".format(key_format[1])
+            else:
+                formatter = None
             # Add the html escaped key to the output
             thing = _get_key(key, scopes)
             if thing is True and key == '.':
@@ -225,7 +231,10 @@ def render(template='', data={}, partials_path='.', partials_ext='mustache',
                 # then get the un-coerced object (next in the stack)
                 thing = scopes[1]
             if not isinstance(thing, unicode_type):
-                thing = unicode(str(thing), 'utf-8')
+                if formatter is None:
+                    thing = unicode(str(thing), 'utf-8')
+                else:
+                    thing = formatter.format(thing)
             output += _html_escape(thing)
 
         # If we're a no html escape tag
