@@ -235,6 +235,9 @@ def render(template='', data={}, partials_path='.', partials_ext='mustache',
                     thing = unicode(str(thing), 'utf-8')
                 else:
                     thing = formatter.format(thing)
+            else:
+                if formatter:
+                    thing = formatter.format(thing)
             output += _html_escape(thing)
 
         # If we're a no html escape tag
