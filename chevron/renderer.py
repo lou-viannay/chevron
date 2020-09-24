@@ -121,6 +121,18 @@ def _get_partial(name, partials_dict, partials_path, partials_ext):
 g_token_cache = {}
 
 
+def __format_thing(thing, formatter):
+    if not isinstance(thing, unicode_type):
+        if formatter is None:
+            thing = unicode(str(thing), 'utf-8')
+        else:
+            thing = formatter.format(thing)
+    else:
+        if formatter:
+            thing = formatter.format(thing)
+    return thing
+
+
 def render(template='', data={}, partials_path='.', partials_ext='mustache',
            partials_dict={}, padding='', def_ldel='{{', def_rdel='}}',
            scopes=None):
@@ -193,6 +205,12 @@ def render(template='', data={}, partials_path='.', partials_ext='mustache',
 
     # Run through the tokens
     for tag, key in tokens:
+        key_format = key.split(':')
+        key = key_format[0]
+        if len(key_format) == 2:
+            formatter = u"{{:{}}}".format(key_format[1])
+        else:
+            formatter = None
         # Set the current scope
         current_scope = scopes[0]
 
@@ -217,12 +235,7 @@ def render(template='', data={}, partials_path='.', partials_ext='mustache',
 
         # If we're a variable tag
         elif tag == 'variable':
-            key_format = key.split(':')
-            key = key_format[0]
-            if len(key_format) == 2:
-                formatter = u"{{:{}}}".format(key_format[1])
-            else:
-                formatter = None
+
             # Add the html escaped key to the output
             thing = _get_key(key, scopes)
             if thing is True and key == '.':
@@ -230,22 +243,14 @@ def render(template='', data={}, partials_path='.', partials_ext='mustache',
                 # (inverted tags do this)
                 # then get the un-coerced object (next in the stack)
                 thing = scopes[1]
-            if not isinstance(thing, unicode_type):
-                if formatter is None:
-                    thing = unicode(str(thing), 'utf-8')
-                else:
-                    thing = formatter.format(thing)
-            else:
-                if formatter:
-                    thing = formatter.format(thing)
+            thing = __format_thing(thing, formatter)
             output += _html_escape(thing)
 
         # If we're a no html escape tag
         elif tag == 'no escape':
             # Just lookup the key and add it
             thing = _get_key(key, scopes)
-            if not isinstance(thing, unicode_type):
-                thing = unicode(str(thing), 'utf-8')
+            thing = __format_thing(thing, formatter)
             output += thing
 
         # If we're a section tag
