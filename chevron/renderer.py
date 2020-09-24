@@ -205,12 +205,12 @@ def render(template='', data={}, partials_path='.', partials_ext='mustache',
 
     # Run through the tokens
     for tag, key in tokens:
-        key_format = key.split(':')
-        key = key_format[0]
-        if len(key_format) == 2:
-            formatter = u"{{:{}}}".format(key_format[1])
-        else:
-            formatter = None
+        formatter = None
+        if tag != 'literal':
+            key_format = key.split(':')
+            key = key_format[0]
+            if len(key_format) == 2:
+                formatter = u"{{:{}}}".format(key_format[1])
         # Set the current scope
         current_scope = scopes[0]
 
