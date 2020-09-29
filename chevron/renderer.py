@@ -121,15 +121,28 @@ def _get_partial(name, partials_dict, partials_path, partials_ext):
 g_token_cache = {}
 
 
+def __thing_formatter(thing, formatter):
+    f_map = dict(
+        i=int, s=str,
+    )
+    f = formatter.split('|')
+    fmt_str = u"{{:{}}}".format(f[0])
+    if len(f) == 2:
+        fmt_cast = f[1]
+        fn = f_map.get(fmt_cast, None)
+        thing = fn(thing)
+    return fmt_str.format(thing)
+
+
 def __format_thing(thing, formatter):
     if not isinstance(thing, unicode_type):
         if formatter is None:
             thing = unicode(str(thing), 'utf-8')
         else:
-            thing = formatter.format(thing)
+            thing = __thing_formatter(thing, formatter)
     else:
         if formatter:
-            thing = formatter.format(thing)
+            thing = __thing_formatter(thing, formatter)
     return thing
 
 
@@ -210,7 +223,8 @@ def render(template='', data={}, partials_path='.', partials_ext='mustache',
             key_format = key.split(':')
             key = key_format[0]
             if len(key_format) == 2:
-                formatter = u"{{:{}}}".format(key_format[1])
+                formatter = key_format[1]
+
         # Set the current scope
         current_scope = scopes[0]
 
