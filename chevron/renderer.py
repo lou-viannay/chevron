@@ -123,7 +123,7 @@ g_token_cache = {}
 
 def __thing_formatter(thing, formatter):
     f_map = dict(
-        i=int, s=str,
+        i=int, s=str, f=float,
     )
     f = formatter.split('|')
     fmt_str = u"{{:{}}}".format(f[0])
